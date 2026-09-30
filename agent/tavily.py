@@ -5,6 +5,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from pprint import pprint
 load_dotenv()
 
+# LLM용 프롬프트 작성을 위한 텍스트 압축 진행
 def clean_recipe_text(text: str) -> str:
     if not text:
         return ""
@@ -31,7 +32,7 @@ def clean_recipe_text(text: str) -> str:
 
 # tavily 파라미터 적용 도메인 제외 적용
 tavily_tool = TavilySearchResults(
-    max_results=3,
+    max_results=1,
     search_depth="advanced",
     include_answer=True,
     exclude_domains=["instagram.com", "facebook.com"]
@@ -47,6 +48,6 @@ def search_recipes(query: str):
             
     return results
 
-query = "돼지고기 목살, 양파, 대파, 고추장, 마늘을 활용한 레시피"
+query = "파스타,마늘,페퍼론치노,바지락을 활용한 레시피"
 results = search_recipes(query)
 pprint(results)

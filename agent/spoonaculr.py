@@ -96,7 +96,7 @@ def optimize_recipe_data(raw_recipes: list):
 if __name__ == "__main__":
     # 검색할 영문 재료명 
     ingredients = ["pork", "kimchi"]
-    number = 2
+    number = 1
 
     # 1단계 재료 기반 레시피 id 검색 실행
     results = search_by_ingredients(ingredients, number)
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         # 2단계 레시피 id로 레시피 검색
         final_results = search_recipe(recipe_ids=recipe_id_list, ingredients_map=ingredients_map)
 
-        # LLM용 프롬프트 작성을 위한 텍스트
+        # LLM용 프롬프트 작성을 위한 텍스트 압축 진행
         optimized_results = optimize_recipe_data(final_results)
 
         # 최종 결과 출력
