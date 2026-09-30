@@ -49,4 +49,4 @@ class RecipeResponse(BaseModel):
     cookingTime: str = Field(description="조리 시간 (예: 20분)")
     level: LevelEnum = Field(description="난이도 (Level0~Level5)")
     cuisine: CuisineEnum = Field(description="요리 종류 (예: 한식, 중식)")
-    recipeIngredients: List[RecipeIngredientSchema] = Field(description="레시피에 사용된 재료 목록")
+    recipeIngredients: List[RecipeIngredient] = Field(description="레시피에 사용된 재료 목록")
