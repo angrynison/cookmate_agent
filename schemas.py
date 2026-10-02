@@ -45,7 +45,6 @@ class RecipeResponse(BaseModel):
     title: str = Field(description="레시피 제목")
     content: str = Field(description="조리 순서 및 상세 설명 (Spring Boot의 content 필드)")
     source: str = Field(description="출처 (예: LangGraph AI Agent / Tavily Search)")
-    cost: int = Field(description="예상 비용 (예: 10000)")
     cookingTime: str = Field(description="조리 시간 (예: 20분)")
     level: LevelEnum = Field(description="난이도 (Level0~Level5)")
     cuisine: CuisineEnum = Field(description="요리 종류 (예: 한식, 중식)")

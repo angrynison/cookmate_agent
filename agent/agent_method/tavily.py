@@ -38,7 +38,7 @@ tavily_tool = TavilySearchResults(
     exclude_domains=["instagram.com", "facebook.com"]
 )
 
-def search_recipes(query: str):
+def search_recipes_tavily(query: str):
     results = tavily_tool.run(query)
     
     # 검색된 결과 리스트를 순회하며 content 값만 전처리 함수로 정제
@@ -49,5 +49,5 @@ def search_recipes(query: str):
     return results
 
 query = "파스타,마늘,페퍼론치노,바지락을 활용한 레시피"
-results = search_recipes(query)
+results = search_recipes_tavily(query)
 pprint(results)

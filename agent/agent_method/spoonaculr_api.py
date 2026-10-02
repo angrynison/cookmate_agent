@@ -7,7 +7,7 @@ from pprint import pprint
 load_dotenv()
 SPOONACULAR_API_KEY = os.getenv("SPOONACULAR_API_KEY")
 
-def search_by_ingredients(ingredients_list: list, number: int):
+def search_recipes_spoonacular(ingredients_list: list, number: int):
     """
     1단계: 보유한 재료 리스트를 받아 Spoonacular API로 레시피 기본 정보를 검색
     """
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     number = 1
 
     # 1단계 재료 기반 레시피 id 검색 실행
-    results = search_by_ingredients(ingredients, number)
+    results = search_recipes_spoonacular(ingredients, number)
 
     if results:
         # id를 기준으로 재료 정보 매핑 딕셔너리 생성 및 ID 리스트 추출
