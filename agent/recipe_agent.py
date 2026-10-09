@@ -9,9 +9,17 @@ from schemas import RecipeRequest, RecipeResponse
 
 # State 정의 (미리 정의해둔 State)
 class RecipeState(TypedDict):
-    pantries: List[str]
+    # 1단계 파이프라인: 레시피 검색
+    request: RecipeRequest
     raw_data: List[dict]  
-    llm_data: RecipeResponse
+
+    # 2단계 파이프라인: eval -> 합격여부, feedback -> 불합격시 수정 지시사항, retry_count -> 무한루프 방지
+    draft: RecipeResponse
+    eval_passed: bool
+    feedback: str
+    retry_count: int
+
+    # 최종 산출물
     final_recipe: RecipeResponse
 
 # 식약처 검색 노드
