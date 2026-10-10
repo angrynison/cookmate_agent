@@ -27,20 +27,21 @@ class UnitEnum(str, Enum):
     tbsp = "tbsp"
     cup = "cup"
     ea = "ea"
-
+    stick = "stick"
+    
 # RecipeIngredient Entity 대응 스키마
 class RecipeIngredient(BaseModel):
     name: str = Field(description="재료명 (예: 돼지고기 목살)")
     quantity: float = Field(description="분량")
     unit: UnitEnum = Field(description="단위")
 
-# AI 추천 요청 스키마 (Spring Boot -> FastAPI)
+# AI 요청 스키마 (Spring Boot -> FastAPI)
 class RecipeRequest(BaseModel):
     user_id: int = Field(description="사용자 ID", default=1)
     pantries: List[str] = Field(description="보유 중인 재료 리스트")
     cuisines: Optional[List[CuisineEnum]] = Field(description="선호하는 요리 종류 (한식, 중식, 일식, 양식, 기타)", default=None)
 
-# AI 추천 응답 스키마 (FastAPI -> Spring Boot)
+# AI 응답 스키마 (FastAPI -> Spring Boot)
 class RecipeResponse(BaseModel):
     title: str = Field(description="레시피 제목")
     content: List[str] = Field(description="조리 순서 및 상세 설명 (Spring Boot의 content 필드)")
