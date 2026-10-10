@@ -1,6 +1,6 @@
 import os
 from langchain_openai import ChatOpenAI
-from schemas import RecipeResponse # 작성해두신 Pydantic 스키마
+from schemas import RecipeResponse 
 
 def generate_recipe_with_llm(context_string: str) -> RecipeResponse:
     """
