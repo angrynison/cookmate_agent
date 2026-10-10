@@ -1,6 +1,7 @@
 # 웹 프레임 워크 FastApi, 서버 구동엔진 uvicorn -> spring boot, tomcat
 from fastapi import FastAPI
 import uvicorn
+from routers import recipe
 
 # 애플리케이션 객체 생성
 app = FastAPI(
@@ -8,6 +9,9 @@ app = FastAPI(
     description="개인 식재료 기반으로 레시피를 추천하는 Langraph AI Agent 입니다",
     version="1.0.0"
 )
+
+app.include_router(recipe.router)
+
 
 # 헬스 체크(Health Check) 엔드포인트
 @app.get("/")
