@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from agent import recipe_agent
-from agent.agent_method import search_recipes_mfds
+from agent.agent_method.mfds_api import search_recipes_mfds
 from schemas import (
     RecipeIngredient,
     LevelEnum, 
@@ -10,6 +10,7 @@ from schemas import (
     UnitEnum
 )
 
+# ApiRouter를 메인 FastAPI 애플리케이션에 포함 시켜야함
 # Spring Boot의 @RequestMapping("/api/recipe")
 router = APIRouter(
     prefix="/api/recipe",
