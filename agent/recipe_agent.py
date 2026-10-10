@@ -4,7 +4,7 @@ import pprint
 from typing import List, TypedDict
 
 from agent.agent_method.generate_recipe_llm import generate_recipe_with_llm
-from agent_method import search_recipes_mfds
+from agent.agent_method.mfds_api import search_recipes_mfds
 from schemas import RecipeRequest, RecipeResponse
 
 # State 정의 (미리 정의해둔 State)
