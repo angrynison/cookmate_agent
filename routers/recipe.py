@@ -25,9 +25,15 @@ async def generate_recipe(request: RecipeRequest):
     Spring Boot 서버로부터 요청받아 식품의약처 한식 레시피를 생성 
     """
     initial_State = {
-        "pantries": request.pantries,
-        "raw_data": [],
-        "llm_data": None,
+        # 1단계 파이프라인: 레시피 섬색
+        "request": request,
+        "recipe_candidates" : None,
+        # 2단계 파이프 라인 LLM 호출 및 평가 
+        "draft": None,
+        "eval_passed": None,
+        "feedback" : None,
+        "retry_count" : 0,
+        # 최종 산출물
         "final_recipe": None
     }
 

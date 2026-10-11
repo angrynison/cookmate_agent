@@ -1,17 +1,19 @@
 # 실제 동작을 수행하는 개별 메서드들 노드로 정의 (Tavily 웹 검색 메서드, LLM에게 프롬프트 던지는 메서드)
 
-import pprint
+from pprint import pprint
 from typing import List, TypedDict
 
 from agent.agent_method.generate_recipe_llm import generate_recipe_with_llm
-from agent.agent_method.mfds_api import search_recipes_mfds
+from agent.agent_method.mfds_api import search_recipes_mfds,mfds_to_candidates
+from agent.agent_dto import FormattedRecipeCandidate
 from schemas import RecipeRequest, RecipeResponse
 
 # State 정의 (미리 정의해둔 State)
 class RecipeState(TypedDict):
     # 1단계 파이프라인: 레시피 검색
     request: RecipeRequest
-    raw_data: List[dict]  
+    recipe_candidates: list[FormattedRecipeCandidate]
+
 
     # 2단계 파이프라인: eval -> 합격여부, feedback -> 불합격시 수정 지시사항, retry_count -> 무한루프 방지
     draft: RecipeResponse
@@ -27,15 +29,27 @@ def mfds_search_node(state: RecipeState):
     """
     1. State에서 재료(pantries) 리스트를 꺼낸다.
     2. 외부에 정의된 식약처 검색 로직을 실행한다.
-    3. 결과를 State의 'mfds_data' 키에 담아 반환한다.
+    3. 검색 결과를 전처리한다
+    4. State 업데이트
     """
-    pantries = state["pantries"]
+    recipe_request = state["request"]
+    pantries = recipe_request.pantries
     
-    # 순수 서비스 로직 호출
+    # Ministry of Food and Drug Safety (MFDS) 식약처 api Raw data 검색
     mfds_results = search_recipes_mfds(pantries)
-    pprint(f"식약처 검색 결과: {mfds_results}")
+
+    # 전처리
+    recipe_candidates = mfds_to_candidates(mfds_results)
+
     # State 업데이트
-    return {"mfds_data": mfds_results}
+    return {
+        **state,
+        "recipe_candidates": recipe_candidates
+        }
+
+
+
+
 
 def llm_generate_recipe_node(state: RecipeState):
     """
