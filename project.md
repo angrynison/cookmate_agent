@@ -46,13 +46,22 @@ cookmate_agent/
 ├── .gitignore
 ├── routers/
 │   └── recipe.py               # /api/recipe 라우터 (Spring Boot의 @RequestMapping 역할)
+├── scripts/                    # 서버가 아니라 데이터 준비용 일회성 배치 (python -m scripts.xxx)
+│   ├── download_mfds.py        # 식약처 전체 레시피 원본 → data/mfds_raw.json
+│   └── normalize_mfds.py       # 원본 재료 문자열을 LLM으로 정규화 → data/mfds_recipes.json (--limit, 이어하기 지원)
+├── data/                       # 배치 결과 JSON (git 제외, 스크립트로 다시 만들 수 있음)
 └── agent/
-    ├── graph.py                # 노드들을 연결해 LangGraph 파이프라인을 조립 (작성 예정)
+    ├── graph.py                # 노드들을 연결해 LangGraph 파이프라인을 조립 (현재 식약처 검색 노드만 연결)
     ├── recipe_agent.py         # State(RecipeState) 정의 + 그래프 노드 함수
+    ├── agent_dto.py            # 에이전트 내부 DTO (SourceEnum, CandidateIngredient, FormattedRecipe 등)
     └── agent_method/           # 노드가 호출하는 "순수 서비스 로직" (외부 API / LLM 호출)
-        ├── mfds_api.py         # 식약처 COOKRCP01 레시피 검색  → search_recipes_mfds()
-        ├── tavily.py           # Tavily 웹 검색 + 블로그 노이즈 정제 → search_recipes_tavily()
-        ├── spoonaculr_api.py   # Spoonacular 재료 기반 검색(영문) → 3단계 수집·병합·압축
+        ├── mfds/
+        │   ├── mfds_api.py     # 식약처 COOKRCP01 조회·재료 파싱 → search_recipes_mfds(), mfds_to_candidates()
+        │   └── mfds_store.py   # (비어 있음)
+        ├── tavily/tavily.py    # Tavily 웹 검색 + 블로그 노이즈 정제 → search_recipes_tavily()
+        ├── spoonaculr/spoonaculr_api.py  # Spoonacular 재료 기반 검색(영문) → 3단계 수집·병합·압축
+        ├── normalize_ingredients_llm.py  # 재료 문자열 LLM 정규화 + validate_ingredients()
+        ├── ranking.py          # (비어 있음) 점수 계산 예정
         └── generate_recipe_llm.py  # LLM으로 RecipeResponse 구조화 생성 → generate_recipe_with_llm()
 ```
 
@@ -140,9 +149,9 @@ pip install -r requirements.txt
 
 ```dotenv
 OPENAI_API_KEY=...        # generate_recipe_llm.py (ChatOpenAI가 자동으로 읽음)
-TAVILY_API_KEY=...        # tavily.py (TavilySearchResults가 자동으로 읽음)
-MFDS_API_KEY=...          # mfds_api.py (식품안전나라 공공데이터 인증키)
-SPOONACULAR_API_KEY=...   # spoonaculr_api.py
+TAVILY_API_KEY=...        # tavily/tavily.py (TavilySearchResults가 자동으로 읽음)
+MFDS_API_KEY=...          # mfds/mfds_api.py (식품안전나라 공공데이터 인증키)
+SPOONACULAR_API_KEY=...   # spoonaculr/spoonaculr_api.py
 ```
 
 `.env`는 `.gitignore`에 포함되어 있으며 **절대 커밋하지 않습니다.** 새 키를 추가하면 이 목록도 갱신합니다.
@@ -164,7 +173,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ### 4.4 개별 모듈 단독 실행 (외부 API 확인용)
 
 ```bash
-python -m agent.agent_method.spoonaculr_api
+python -m agent.agent_method.spoonaculr.spoonaculr_api
 ```
 
 `if __name__ == "__main__":` 블록에서 샘플 입력으로 동작을 확인합니다. 별도 테스트 프레임워크는 아직 없습니다.
@@ -215,13 +224,13 @@ python -m agent.agent_method.spoonaculr_api
 
 | # | 위치 | 내용 |
 |---|---|---|
-| 1 | `main.py` | `routers/recipe.py`의 라우터가 **등록되지 않음** → `app.include_router(router)` 필요. 현재는 `/`만 응답 |
-| 2 | `agent/graph.py` | 비어 있음. `StateGraph(RecipeState)`로 노드 연결 및 `compile()` 필요 |
-| 3 | `routers/recipe.py` | `recipe_agent.invoke(...)` 호출 대상이 컴파일된 그래프가 아니라 모듈. `/generate`가 값을 반환하지 않음. 두 엔드포인트의 함수명이 `generate_recipe`로 중복 |
-| 4 | `routers/recipe.py`, `agent/recipe_agent.py` | `from agent_method import ...` / `from agent.agent_method import search_recipes_mfds` — `__init__.py`가 없어 실패. `from agent.agent_method.mfds_api import search_recipes_mfds`로 수정 |
-| 5 | `agent/recipe_agent.py` | `import pprint` 후 `pprint(...)` 호출 → `from pprint import pprint` 필요. 노드가 State에 없는 키(`pantries`, `mfds_data`, `llm_data`)를 사용 |
-| 6 | `agent/agent_method/tavily.py` | 파일 하단 테스트 코드가 **import 시점에 실행**되어 API를 호출함 → `__main__` 블록으로 이동 |
-| 7 | `agent/agent_method/mfds_api.py` | 재료를 `&`로 연결 — 식약처 API 파라미터 형식 확인 필요. `.env`에 `MFDS_API_KEY` 없음 |
+| ~~1~~ | `main.py` | ✅ 해결 (2026-10-15 확인): `app.include_router(recipe.router)` 등록됨 |
+| ~~2~~ | `agent/graph.py` | ✅ 해결 (2026-10-15 확인): `StateGraph` 구성됨. Spoonacular·Tavily 노드 분기(`route_by_cuisine`)는 아직 미연결 |
+| 3 | `routers/recipe.py` | `recipe_agent.invoke(...)` 호출 대상이 컴파일된 그래프가 아니라 모듈. `/generate`가 값을 반환하지 않음. 두 엔드포인트의 함수명이 `generate_recipe`로 중복 | (2026-10-15 확인: 여전히 `from agent import recipe_agent` 모듈을 invoke)
+| ~~4~~ | `routers/recipe.py`, `agent/recipe_agent.py` | ✅ 해결 (2026-10-15 확인): `from agent.agent_method.mfds.mfds_api import ...` 로 변경됨 |
+| 5 | `agent/recipe_agent.py` | `pprint` import 는 해결됨. 노드가 State에 없는 키(`pantries`, `mfds_data`, `llm_data`)를 사용 |
+| 6 | `agent/agent_method/tavily/tavily.py` | 파일 하단 테스트 코드가 **import 시점에 실행**되어 API를 호출함 → `__main__` 블록으로 이동 |
+| 7 | `agent/agent_method/mfds/mfds_api.py` | 재료를 `&`로 연결 — 식약처 API 파라미터 형식 확인 필요. 키 누락 시 `RuntimeError` 처리는 추가됨 |
 | 8 | `routers/recipe.py` 테스트 API | 더미 응답이 스키마에 없는 `cost` 필드를 넘기고, `content`를 `List[str]`이 아닌 문자열로 넘김 |
 | 9 | `generate_recipe_llm.py` | 프롬프트가 "한식 요리사"로 고정 — `cuisines` 요청값 반영 필요. 타입 힌트(`context_string: str`)와 실제 전달값(`List[dict]`) 불일치 |
 | 10 | 전체 | 동기 함수(`httpx.Client`, `invoke`)를 `async def` 엔드포인트에서 호출 → 이벤트 루프 블로킹. `httpx.AsyncClient`/`ainvoke` 또는 일반 `def` 엔드포인트로 전환 고려 |

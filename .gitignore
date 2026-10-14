@@ -11,4 +11,8 @@ __pycache__/
 # VS Code 설정
 .vscode/
 
-.ini
+# Windows 폴더 설정 파일
+desktop.ini
+
+# 배치 스크립트 결과 (scripts/*.py 로 다시 만들 수 있음)
+data/
