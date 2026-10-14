@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from agent import recipe_agent
-from agent.agent_method.mfds_api import search_recipes_mfds
+from agent.agent_method.mfds.mfds_api import search_recipes_mfds
 from schemas import (
     RecipeIngredient,
     LevelEnum, 

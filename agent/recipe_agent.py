@@ -4,15 +4,15 @@ from pprint import pprint
 from typing import List, TypedDict
 
 from agent.agent_method.generate_recipe_llm import generate_recipe_with_llm
-from agent.agent_method.mfds_api import search_recipes_mfds,mfds_to_candidates
-from agent.agent_dto import FormattedRecipeCandidate
+from agent.agent_method.mfds.mfds_api import search_recipes_mfds,mfds_to_candidates
+from agent.agent_dto import FormattedRecipe
 from schemas import RecipeRequest, RecipeResponse
 
 # State 정의 (미리 정의해둔 State)
 class RecipeState(TypedDict):
     # 1단계 파이프라인: 레시피 검색
     request: RecipeRequest
-    recipe_candidates: list[FormattedRecipeCandidate]
+    recipe_candidates: list[FormattedRecipe]
 
 
     # 2단계 파이프라인: eval -> 합격여부, feedback -> 불합격시 수정 지시사항, retry_count -> 무한루프 방지

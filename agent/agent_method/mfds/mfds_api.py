@@ -4,10 +4,50 @@ import re
 import httpx
 from dotenv import load_dotenv
 
-from agent.agent_dto import CandidateIngredient, FormattedRecipeCandidate, SourceEnum
+from agent.agent_dto import CandidateIngredient, FormattedRecipe, SourceEnum
 
 load_dotenv()
 MFDS_API_KEY = os.getenv("MFDS_API_KEY")
+
+
+MFDS_BASE_URL = "http://openapi.foodsafetykorea.go.kr/api"
+MFDS_SERVICE_ID = "COOKRCP01"
+_MFDS_CODE_OK = "INFO-000"        # 정상 처리
+_MFDS_CODE_NO_DATA = "INFO-200"   # 해당 데이터 없음 
+
+
+def fetch_mfds_rows(start: int, end: int, timeout: float = 30.0) -> tuple[list[dict], int]:
+    """
+    식약처 레시피를 start번 ~ end번 구간만큼 가져온다
+    """
+
+    # api key가 없는경우 에러처리
+    if not MFDS_API_KEY:
+        raise RuntimeError("MFDS_API_KEY가 .env에 없습니다.")
+
+    url = f"{MFDS_BASE_URL}/{MFDS_API_KEY}/{MFDS_SERVICE_ID}/json/{start}/{end}"
+
+    with httpx.Client(timeout=timeout) as client:
+        response = client.get(url)
+        response.raise_for_status()   
+    data = response.json()
+
+    # api 응답 에러코드 저장
+    body = data.get(MFDS_SERVICE_ID, data)
+    result = body.get("RESULT", {})
+    code = result.get("CODE")
+
+    # 정상이 아니면 에러, 데이터 없음이면 빈 결과
+    if code == _MFDS_CODE_NO_DATA:
+        return [], 0
+    if code != _MFDS_CODE_OK:
+
+        raise RuntimeError(f"식약처 API 오류 [{code}] {result.get('MSG')}")
+
+    rows = body.get("row", [])
+    total = int(body.get("total_count", 0))  
+    return rows, total
+
 
 # Ministry of Food and Drug Safety (MFDS)
 def search_recipes_mfds(pantries: list[str]) -> list[dict]:
@@ -114,7 +154,7 @@ def parse_mfds_ingredients(dtls: str) -> list[CandidateIngredient]:
     return ingredients
 
 
-def _extract_steps(row: dict) -> list[str]:
+def extract_steps(row: dict) -> list[str]:
     """
     레시피 추출
     MANUAL01 ~ MANUAL20 중 내용이 있는 것만 순서대로 모으고 앞 번호("1. ")를 뗀다
@@ -131,19 +171,19 @@ def _extract_steps(row: dict) -> list[str]:
     return steps
 
 
-def mfds_to_candidates(rows: list[dict]) -> list[FormattedRecipeCandidate]:
+def mfds_to_candidates(rows: list[dict]) -> list[FormattedRecipe]:
     """
-    LLM 입력을 위해 식약처 검색 결과 row 리스트를 DTO 리스트로 변환
+    LLM 입력을 위해 식약처 검색 결과 row 리스트를 DTO 리스트(Formatted 객체)로 변환
     1단계: 제목·재료·단계 추출
     2단계: 쓸 수 없는 row(제목 없음, 단계 없음) 제외
     3단계: 빈 문자열 필드는 None으로 통일해서 DTO 생성
     """
-    candidates: list[FormattedRecipeCandidate] = []
+    candidates: list[FormattedRecipe] = []
 
     for row in rows:
         title = (row.get("RCP_NM") or "").strip()
         # 조리 단계 추출
-        steps = _extract_steps(row)
+        steps = extract_steps(row)
         # 재료 이름, 조리 단계가 없으면 스킵(쓸모가 없음)
         if not title or not steps:               
             continue
@@ -155,7 +195,7 @@ def mfds_to_candidates(rows: list[dict]) -> list[FormattedRecipeCandidate]:
         ]
 
         candidates.append(
-            FormattedRecipeCandidate(
+            FormattedRecipe(
                 title=title,
                 ingredients=ingredients,
                 steps=steps,
@@ -169,24 +209,4 @@ def mfds_to_candidates(rows: list[dict]) -> list[FormattedRecipeCandidate]:
     return candidates
 
 
-# 테스트: python -m agent.agent_method.mfds_api 
-if __name__ == "__main__":
-    from pprint import pprint
 
-    sample_row = {
-        "RCP_SEQ": "137",
-        "RCP_NM": "된장 두부찌개",
-        "RCP_PARTS_DTLS": "두부 320g(1모), 쌀뜨물 300g(1½컵), 돼지고기 100g, 김치 140g, 된장 20g(1½큰술), "
-                          "청양고추 10g(1/2개), 홍고추 5g(1/4개),\n대파 10g(2cm), 고춧가루 5g(1작은술)",
-        "MANUAL01": "1. 두부에 쌀뜨물을 넣고 갈아준다.",
-        "MANUAL02": "2. 돼지고기는 썰고 김치는 물에 씻어 양념을 제거하고 3×3cm로 썬다.",
-        "MANUAL03": "3. 냄비에 돼지고기와 김치를 함께 볶은 후, 망에 거른 된장과 1의 두부, 고춧가루, 청양고추, 홍고추를 넣어 끓이다가 대파를 넣어 완성한다.",
-        "MANUAL04": "",
-        "RCP_NA_TIP": "김치는 물에 헹구어 염분을 제거하고 고추를 넣어 매운 맛과 향을 더한다.",
-    }
-
-    for candidate in mfds_to_candidates([sample_row]):
-        pprint(candidate.model_dump())
-
-    # 예외 패턴 확인용
-    pprint(parse_mfds_ingredients("●양념장 : 간장 10g(2작은술), 소금 약간, 고추장 10g(2작은술, 듬뿍)"))
