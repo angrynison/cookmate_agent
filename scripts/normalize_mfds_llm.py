@@ -4,7 +4,7 @@ from agent.agent_dto import NormalizedIngredients
 
 _MODEL_NAME = "gpt-4o-mini"
 
-
+# 정규화 규칙 프롬프트
 _SYSTEM_PROMPT = """
 # 역할
 당신은 한국어 레시피 데이터를 정리하는 데이터 추출 담당자입니다.
@@ -97,7 +97,7 @@ _SYSTEM_PROMPT = """
  {"name": "달걀", "original": "달걀 105g", "group": "반죽"}]
 """.strip()
 
-
+# data 원문 가져오기
 _USER_TEMPLATE = """제목: {title}
 <재료원문>
 {dtls}
