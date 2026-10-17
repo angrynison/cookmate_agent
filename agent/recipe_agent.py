@@ -4,7 +4,8 @@ from pprint import pprint
 from typing import List, TypedDict
 
 from agent.agent_method.generate_recipe_llm import generate_recipe_with_llm
-from agent.agent_method.mfds.mfds_api import search_recipes_mfds,mfds_to_candidates
+from agent.agent_method.mfds.mfds_api import search_recipes_mfds
+from agent.agent_method.spoonaculr.spoonaculr_api import search_recipes_spoonaculr
 from agent.agent_dto import FormattedRecipe
 from schemas import RecipeRequest, RecipeResponse
 
@@ -13,7 +14,7 @@ class RecipeState(TypedDict):
     # 1단계 파이프라인: 레시피 검색
     request: RecipeRequest
     recipe_candidates: list[FormattedRecipe]
-
+    
 
     # 2단계 파이프라인: eval -> 합격여부, feedback -> 불합격시 수정 지시사항, retry_count -> 무한루프 방지
     draft: RecipeResponse
@@ -25,31 +26,59 @@ class RecipeState(TypedDict):
     final_recipe: RecipeResponse
 
 # 식약처 검색 노드
-def mfds_search_node(state: RecipeState):
+def mfds_node(state: RecipeState):
     """
     1. State에서 재료(pantries) 리스트를 꺼낸다.
-    2. 외부에 정의된 식약처 검색 로직을 실행한다.
-    3. 검색 결과를 전처리한다
-    4. State 업데이트
+    2. 외부에 정의된 식약처 검색 로직을 실행한다. (오프라인으로 recipes.json에서 검색)
+    3. State 업데이트
     """
-    recipe_request = state["request"]
+    recipe_request = state.get("request")
     pantries = recipe_request.pantries
     
     # Ministry of Food and Drug Safety (MFDS) 식약처 api Raw data 검색
     mfds_results = search_recipes_mfds(pantries)
 
-    # 전처리
-    recipe_candidates = mfds_to_candidates(mfds_results)
+    # State 업데이트
+    return {
+        **state,
+        "recipe_candidates": mfds_results
+    }
+
+def spoonacular_node(state: RecipeState):
+    """
+    1. State에서 재료(pantries) 리스트를 꺼낸다.
+    2. 외부에 정의된 Spoonacular 검색 로직을 실행한다.
+    3. 검색 결과를 전처리한다
+    4. State 업데이트
+    """
+
+    recipe_request = state.get("request")
+    pantries = recipe_request.pantries
+
+    # Spoonacular API Raw data 검색
+    spoonacular_results = search_recipes_spoonaculr(pantries)
 
     # State 업데이트
     return {
         **state,
-        "recipe_candidates": recipe_candidates
-        }
+        "recipe_candidates": spoonacular_results
+    }
 
 
+def tavily_node(state: RecipeState):
+    """
+    1. State에서 재료(pantries) 리스트를 꺼낸다.
+    2. 외부에 정의된 Tavily 검색 로직을 실행한다.
+    3. 검색 결과를 전처리한다
+    4. State 업데이트
+    """
 
-
+def ranking_candidates_node(state: RecipeState):
+    """
+    1. State에서 recipe_candidates를 꺼낸다.
+    2. 외부에 정의된 ranking 로직을 실행한다.
+    3. State 업데이트
+    """
 
 def llm_generate_recipe_node(state: RecipeState):
     """
