@@ -15,4 +15,7 @@ __pycache__/
 desktop.ini
 
 # 배치 스크립트 결과 (scripts/*.py 로 다시 만들 수 있음)
-data/
+data/mfds_raw.json
+data/mfds_recipes_errors.json
+data/spoonacular_raw.json
+
