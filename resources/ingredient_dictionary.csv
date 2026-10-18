@@ -1,0 +1,90 @@
+﻿name_ko,name_en,aliases_ko,aliases_en,source,verified
+돼지고기,pork,돈육|돼지,pork|pork shoulder|pork loin|ground pork,claude,false
+삼겹살,pork belly,통삼겹|대패삼겹살,pork belly|pork belly slices,claude,false
+소고기,beef,쇠고기|우육,beef|beef chuck|ground beef|beef steak,claude,false
+닭고기,chicken,닭|계육,chicken|whole chicken|chicken pieces,claude,false
+닭가슴살,chicken breast,가슴살,chicken breast|chicken breasts|boneless skinless chicken breast,claude,false
+닭다리살,chicken thigh,다리살|닭정육,chicken thigh|chicken thighs|boneless skinless chicken thighs,claude,false
+베이컨,bacon,,bacon|bacon slices|bacon strips,claude,false
+햄,ham,슬라이스햄,ham|deli ham|ham slices,claude,false
+소시지,sausage,소세지|비엔나소시지,sausage|sausages|bulk sausage|sausage links,claude,false
+새우,shrimp,칵테일새우|생새우,shrimp|prawns|raw shrimp,claude,false
+오징어,squid,,squid|calamari,claude,false
+참치,tuna,참치캔,tuna|canned tuna|tuna in water,claude,false
+연어,salmon,,salmon|salmon fillet|salmon fillets,claude,false
+고등어,mackerel,,mackerel|mackerel fillets,claude,false
+멸치,anchovy,국물멸치|잔멸치|볶음멸치,anchovies|anchovy|dried anchovies,claude,false
+조개,clam,바지락|모시조개,clams|littleneck clams,claude,false
+김,nori,조미김|김밥김,nori|nori sheets|seaweed sheets|roasted seaweed,claude,false
+미역,wakame,건미역,wakame|dried wakame|dried seaweed,claude,false
+양파,onion,,onion|onions|yellow onion|white onion,claude,false
+대파,green onion,파,green onions|scallions|spring onions,claude,false
+쪽파,scallion,실파,scallions|green onions,claude,false
+마늘,garlic,통마늘|깐마늘,garlic|garlic cloves|minced garlic,claude,false
+생강,ginger,,ginger|fresh ginger|ginger root,claude,false
+감자,potato,,potato|potatoes|russet potatoes,claude,false
+고구마,sweet potato,,sweet potato|sweet potatoes,claude,false
+당근,carrot,,carrot|carrots,claude,false
+무,radish,조선무|무우,daikon radish|daikon|radish,claude,false
+배추,napa cabbage,알배추|알배기배추,napa cabbage|chinese cabbage,claude,false
+양배추,cabbage,,cabbage|green cabbage,claude,false
+시금치,spinach,,spinach|baby spinach|fresh spinach,claude,false
+애호박,zucchini,,zucchini|courgette|summer squash,claude,false
+단호박,kabocha squash,,kabocha squash|pumpkin|squash,claude,false
+오이,cucumber,,cucumber|cucumbers,claude,false
+토마토,tomato,,tomato|tomatoes,claude,false
+방울토마토,cherry tomato,,cherry tomatoes|grape tomatoes,claude,false
+파프리카,bell pepper,,bell pepper|bell peppers|red bell pepper,claude,false
+피망,green bell pepper,,green bell pepper|green pepper,claude,false
+고추,chili pepper,풋고추|청양고추|홍고추,chili pepper|green chili|red chili|jalapeno,claude,false
+브로콜리,broccoli,,broccoli|broccoli florets,claude,false
+콩나물,soybean sprouts,,soybean sprouts|bean sprouts,claude,false
+숙주,mung bean sprouts,숙주나물,bean sprouts|mung bean sprouts,claude,false
+부추,garlic chives,,garlic chives|chives|chinese chives,claude,false
+깻잎,perilla leaves,,perilla leaves|shiso,claude,false
+상추,lettuce,,lettuce|lettuce leaves|romaine lettuce,claude,false
+표고버섯,shiitake mushroom,표고,shiitake mushrooms|dried shiitake mushrooms,claude,false
+팽이버섯,enoki mushroom,팽이,enoki mushrooms,claude,false
+새송이버섯,king oyster mushroom,새송이,king oyster mushrooms,claude,false
+느타리버섯,oyster mushroom,느타리,oyster mushrooms,claude,false
+양송이버섯,button mushroom,양송이,button mushrooms|white mushrooms|mushrooms,claude,false
+배,pear,,pear|pears|asian pear,claude,false
+사과,apple,,apple|apples,claude,false
+레몬,lemon,레몬즙,lemon|lemons|lemon juice,claude,false
+바나나,banana,,banana|bananas,claude,false
+달걀,egg,계란|날계란,eggs|egg|large eggs,claude,false
+우유,milk,,milk|whole milk,claude,false
+버터,butter,무염버터|가염버터,butter|unsalted butter|salted butter,claude,false
+치즈,cheese,슬라이스치즈|체다치즈,cheese|cheddar cheese|shredded cheese,claude,false
+모짜렐라치즈,mozzarella,모차렐라|피자치즈,mozzarella|mozzarella cheese|shredded mozzarella,claude,false
+생크림,heavy cream,휘핑크림,heavy cream|whipping cream|heavy whipping cream,claude,false
+두부,tofu,부침두부|찌개두부|연두부,tofu|firm tofu|soft tofu,claude,false
+쌀,rice,백미,rice|white rice|short grain rice,claude,false
+밥,cooked rice,공기밥|흰밥,cooked rice|steamed rice,claude,false
+밀가루,flour,중력분|박력분|강력분,flour|all purpose flour,claude,false
+빵가루,breadcrumbs,,breadcrumbs|panko|bread crumbs,claude,false
+국수,noodles,소면|중면,noodles|somen noodles|thin noodles,claude,false
+당면,glass noodles,,glass noodles|sweet potato noodles|cellophane noodles,claude,false
+떡,rice cake,떡볶이떡|가래떡,rice cakes|korean rice cakes,claude,false
+파스타,pasta,스파게티면,pasta|spaghetti,claude,false
+김치,kimchi,배추김치,kimchi,claude,false
+간장,soy sauce,진간장|양조간장|국간장,soy sauce|low sodium soy sauce|light soy sauce,claude,false
+고추장,gochujang,,gochujang|korean chili paste|red pepper paste,claude,false
+된장,doenjang,,doenjang|soybean paste|miso,claude,false
+고춧가루,gochugaru,고추가루,gochugaru|korean red pepper flakes|red pepper flakes,claude,false
+참기름,sesame oil,,sesame oil|toasted sesame oil,claude,false
+들기름,perilla oil,,perilla oil,claude,false
+깨,sesame seeds,참깨|통깨|볶은깨,sesame seeds|toasted sesame seeds,claude,false
+맛술,mirin,미림,mirin|rice wine,claude,false
+굴소스,oyster sauce,,oyster sauce,claude,false
+물엿,corn syrup,올리고당|조청,corn syrup|rice syrup,claude,false
+소금,salt,천일염|꽃소금,salt|sea salt|kosher salt,claude,false
+설탕,sugar,백설탕|흰설탕,sugar|granulated sugar|white sugar,claude,false
+흑설탕,brown sugar,황설탕,brown sugar|light brown sugar,claude,false
+후추,black pepper,후춧가루|후추가루|통후추,black pepper|pepper|ground black pepper,claude,false
+식초,vinegar,양조식초|사과식초,vinegar|rice vinegar|apple cider vinegar,claude,false
+식용유,vegetable oil,콩기름|카놀라유,vegetable oil|canola oil|oil,claude,false
+올리브유,olive oil,올리브오일,olive oil|extra virgin olive oil,claude,false
+꿀,honey,,honey,claude,false
+케첩,ketchup,토마토케첩,ketchup|tomato ketchup,claude,false
+마요네즈,mayonnaise,마요,mayonnaise|mayo,claude,false
