@@ -27,15 +27,15 @@ class CandidateIngredient(BaseModel):
             "예: '●양념장 : 간장 10g(2작은술)' → '간장 10g(2작은술)'"
         )
     )
-    # 보류
-    # group: str | None = Field(
-    #     default=None,
-    #     description=(
-    #         "이 재료가 속한 소제목(예: 주재료, 양념장, 육수). "
-    #         "소제목은 다음 소제목이 나올 때까지 뒤 재료들에도 이어진다. "
-    #         "소제목이 없으면 null. '[ 2인분 ]' 같은 인분 표시는 소제목이 아니다"
-    #     ),
-    # )
+    # 소스용 재료인지 구분하려고 둔다. 식약처만 채우고, Spoonacular는 소제목 정보가 없어 기본값 None
+    group: str | None = Field(
+        default=None,
+        description=(
+            "이 재료가 속한 소제목(예: 주재료, 양념장, 육수). 원문 표기 그대로 쓰고 기호·괄호·콜론은 뺀다. "
+            "소제목은 다음 소제목이 나올 때까지 뒤 재료들에도 이어진다. "
+            "소제목이 없으면 null. '[ 2인분 ]' 같은 인분 표시는 소제목이 아니다"
+        ),
+    )
 
 
 # 정규화 LLM 출력 전용 모델 (normalize_rawdata_llm.py의 with_structured_output에 넘긴다)
