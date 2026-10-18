@@ -1,8 +1,12 @@
 from functools import lru_cache
 from langchain_openai import ChatOpenAI
 from agent.agent_dto import NormalizedIngredients
-
+import os
+from dotenv import load_dotenv
 _MODEL_NAME = "gpt-4o-mini"
+
+load_dotenv()
+OPEN_API_KEY = os.getenv("OPEN_API_KEY")
 
 # 정규화 규칙 프롬프트
 _SYSTEM_PROMPT = """
@@ -15,20 +19,22 @@ _SYSTEM_PROMPT = """
 - 결과는 두 곳에 쓰입니다.
   1) name: 사용자의 냉장고 재료(예: "마늘", "두부")와 비교해 레시피 추천 점수를 계산합니다.
   2) original: 나중에 다른 AI가 분량을 보고 레시피를 쓸 때 그대로 전달됩니다.
-- 결과는 프로그램이 자동 검사합니다. original이 원문에 글자 그대로 없거나, name이 original 안에 없으면 실패입니다.
+  3) group: 그 AI가 일반 재료와 소스·양념장용 재료를 구분할 때 씁니다.
+- 결과는 프로그램이 자동 검사합니다. original이나 group이 원문에 글자 그대로 없거나, name이 original 안에 없으면 실패입니다.
 
 # 지시사항
 1. 원문에 있는 재료를 순서대로 빠짐없이 나눕니다. 원문에 없는 재료는 절대 추가하지 않습니다.
 2. 쉼표·줄바꿈이 없어도 재료가 붙어 있을 수 있습니다.
    "양송이버섯 9g [소스소개] 소스:양파다진것 6g"처럼 한 덩어리에 재료가 둘이면 둘로 나눕니다.
-3. 소제목(group)
-   - 형태: "양념장 : 간장", "크림치즈 > 우유", "[주재료] 소고기", "●주재료"만 있는 줄,
-     줄 맨 앞의 "재료", "육수", "양념", "소스" 같은 단어
+3. 소제목은 재료가 아니라 group에 넣습니다. name과 original에는 넣지 않습니다.
+   - 형태: "양념장 : 간장"의 "양념장 :", "크림치즈 > 우유"의 "크림치즈 >", "[주재료] 소고기"의 "[주재료]",
+     "●주재료"·"고명"처럼 소제목만 있는 줄, 줄 맨 앞의 "재료", "육수", "양념", "소스" 같은 단어
+   - group에는 소제목 글자만 원문 표기 그대로 씁니다. 기호(●•·[]), 콜론(:), ">"는 뺍니다.
    - 소제목은 다음 소제목이 나올 때까지 뒤 재료들에 이어집니다.
-   - 소제목이 겹치면("[소스소개] 소스:") 재료에 가장 가까운 것("소스")을 씁니다.
+   - 소제목이 겹치면("[소스소개] 볶음소스:") 재료에 가장 가까운 것("볶음소스")을 씁니다.
    - 소제목이 나오기 전의 재료는 group이 null입니다.
 4. 재료가 아닌 것은 버립니다: 요리 이름(제목과 같은 줄, 띄어쓰기 차이는 무시),
-   "[ 2인분 ]"·"2인분 기준" 같은 인분 표시, "<br>"·"<br />" 태그, "•"·"●" 같은 기호, 소제목만 있는 줄.
+   "[ 2인분 ]"·"2인분 기준" 같은 인분 표시, "<br>"·"<br />" 태그, "•"·"●" 같은 기호.
 5. name: 재료 이름만 남깁니다. 분량, 단위, 괄호, "약간", 번호 기호(①②),
    손질 표현(다진, 다진것, 채 썬, 삶은, 볶은, 마른것)을 뺍니다.
    단, 표기는 바꾸지 않습니다(쇠고기를 소고기로, 계란을 달걀로 바꾸지 않음).
@@ -60,13 +66,13 @@ _SYSTEM_PROMPT = """
 [예시 2]
 제목: 닭고기 바비큐
 <재료원문>
-닭가슴살 60g, 양파 30g [소스소개] 소스:양파다진것 6g, 케첩 9g<br /> 이탈리안시즈닝:바질 1.2g
+닭가슴살 60g, 양파 30g [소스소개] 바비큐소스:양파다진것 6g, 케첩 9g<br /> 이탈리안시즈닝:바질 1.2g
 </재료원문>
 결과:
 [{"name": "닭가슴살", "original": "닭가슴살 60g", "group": null},
  {"name": "양파", "original": "양파 30g", "group": null},
- {"name": "양파", "original": "양파다진것 6g", "group": "소스"},
- {"name": "케첩", "original": "케첩 9g", "group": "소스"},
+ {"name": "양파", "original": "양파다진것 6g", "group": "바비큐소스"},
+ {"name": "케첩", "original": "케첩 9g", "group": "바비큐소스"},
  {"name": "바질", "original": "바질 1.2g", "group": "이탈리안시즈닝"}]
 
 [예시 3]
@@ -115,6 +121,7 @@ def _get_structured_llm():
         temperature=0,      # 최대한 같은 출력 (정규화는 창의성이 필요 없다)
         timeout=60,         # 응답이 멈춰도 배치 전체가 무한정 기다리지 않게
         max_retries=2,      # 일시적 오류(429 요청 한도, 5xx)는 클라이언트가 간격을 두고 재시도
+        api_key=OPEN_API_KEY
     )
     return llm.with_structured_output(NormalizedIngredients)
 
@@ -138,6 +145,22 @@ def normalize_ingredients_with_llm(title: str, dtls: str) -> NormalizedIngredien
     # 모델이 구조화 출력을 못 만들면 None이 올 수 있다 → 조용히 넘어가지 않고 실패로 올린다
     if result is None:
         raise ValueError("LLM이 구조화된 결과를 반환하지 않았습니다")
+    return _forward_fill_groups(result)
+
+
+def _forward_fill_groups(result: NormalizedIngredients) -> NormalizedIngredients:
+    """
+    소제목이 한 번 나온 뒤 group이 None으로 돌아간 재료를 앞 재료의 group으로 채운다
+    - 규칙: 소제목은 다음 소제목이 나올 때까지 이어진다 → 한 번 나온 뒤에는 None일 수 없다
+    - LLM이 한 줄 안의 소제목("(육수) 물 500ml, 디포리 2g")을 첫 재료에만 붙이고 끊는 경우가 있어 코드로 보정한다
+    - 첫 소제목 전의 None은 그대로 둔다 (소제목 없는 재료)
+    """
+    current: str | None = None
+    for ingredient in result.ingredients:
+        if ingredient.group:
+            current = ingredient.group
+        elif current:
+            ingredient.group = current
     return result
 
 
@@ -152,6 +175,7 @@ def validate_ingredients(dtls: str, result: NormalizedIngredients) -> list[str]:
     - original이 원문 안에 있는가 → 재료를 지어냈는지, 예시를 베꼈는지 잡는다
     - name이 original 안에 있는가 → 표기를 바꿨는지(쇠고기→소고기) 잡는다
     - 원문이 있는데 재료가 0개인가 → 통째로 빠뜨렸는지 잡는다
+    - group이 있으면 원문 안에 있는가 → 소제목을 지어냈는지 잡는다
     LLM·State를 모르는 순수 함수라서 pytest로 바로 테스트할 수 있다
     """
     errors: list[str] = []
@@ -171,5 +195,8 @@ def validate_ingredients(dtls: str, result: NormalizedIngredients) -> list[str]:
             errors.append(f"[{index}] original이 원문에 없음: {ingredient.original!r}")
         if name and original and name not in original:
             errors.append(f"[{index}] name이 original에 없음: {ingredient.name!r} / {ingredient.original!r}")
+        # group은 없어도 되지만, 있으면 원문에 있어야 한다 → 소제목을 지어냈거나 예시를 베꼈는지 잡는다
+        if ingredient.group and _compact(ingredient.group) not in source:
+            errors.append(f"[{index}] group이 원문에 없음: {ingredient.group!r}")
 
     return errors
