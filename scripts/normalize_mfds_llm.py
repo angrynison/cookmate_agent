@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 _MODEL_NAME = "gpt-4o-mini"
 
 load_dotenv()
-OPEN_API_KEY = os.getenv("OPEN_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # 정규화 규칙 프롬프트
 _SYSTEM_PROMPT = """
@@ -121,7 +121,7 @@ def _get_structured_llm():
         temperature=0,      # 최대한 같은 출력 (정규화는 창의성이 필요 없다)
         timeout=60,         # 응답이 멈춰도 배치 전체가 무한정 기다리지 않게
         max_retries=2,      # 일시적 오류(429 요청 한도, 5xx)는 클라이언트가 간격을 두고 재시도
-        api_key=OPEN_API_KEY
+        api_key=OPENAI_API_KEY
     )
     return llm.with_structured_output(NormalizedIngredients)
 

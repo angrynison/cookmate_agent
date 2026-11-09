@@ -3,9 +3,10 @@
 from pprint import pprint
 from typing import List, TypedDict
 
+from agent.agent_method.ingredient_translator import translate_ingredients
 from agent.agent_method.generate_recipe_llm import generate_recipe_with_llm
 from agent.agent_method.mfds.mfds_api import search_recipes_mfds
-from agent.agent_method.spoonaculr.spoonaculr_api import search_recipes_spoonaculr
+from agent.agent_method.spoonacular.spoonacular_api import search_spoonacular_candidates
 from agent.agent_dto import FormattedRecipe
 from schemas import RecipeRequest, RecipeResponse
 
@@ -13,6 +14,7 @@ from schemas import RecipeRequest, RecipeResponse
 class RecipeState(TypedDict):
     # 1단계 파이프라인: 레시피 검색
     request: RecipeRequest
+    translated_ingredients: list[str]
     recipe_candidates: list[FormattedRecipe]
     
 
@@ -24,6 +26,20 @@ class RecipeState(TypedDict):
 
     # 최종 산출물
     final_recipe: RecipeResponse
+
+def translate_node(state: RecipeState):
+    """
+    한국어 -> 영어로 번역하는 node
+    """
+    recipe_request = state.get("request")
+    pantries = recipe_request.pantries
+
+    translated = translate_ingredients(pantries)
+
+    return {
+        **state,
+        "translated_ingredients" : translated
+    }
 
 # 식약처 검색 노드
 def mfds_node(state: RecipeState):
@@ -52,17 +68,18 @@ def spoonacular_node(state: RecipeState):
     4. State 업데이트
     """
 
-    recipe_request = state.get("request")
-    pantries = recipe_request.pantries
+    pantries = state.get("translated_ingredients")
 
     # Spoonacular API Raw data 검색
-    spoonacular_results = search_recipes_spoonaculr(pantries)
+    spoonacular_results = search_spoonacular_candidates(pantries)
 
     # State 업데이트
     return {
         **state,
         "recipe_candidates": spoonacular_results
     }
+
+
 
 
 def tavily_node(state: RecipeState):

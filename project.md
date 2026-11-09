@@ -59,7 +59,7 @@ cookmate_agent/
         │   ├── mfds_api.py     # 식약처 COOKRCP01 조회·재료 파싱 → search_recipes_mfds(), mfds_to_candidates()
         │   └── mfds_store.py   # (비어 있음)
         ├── tavily/tavily.py    # Tavily 웹 검색 + 블로그 노이즈 정제 → search_recipes_tavily()
-        ├── spoonaculr/spoonaculr_api.py  # Spoonacular 재료 기반 검색(영문) → 3단계 수집·병합·압축
+        ├── spoonacular/spoonacular_api.py  # Spoonacular 재료 기반 검색(영문) → 3단계 수집·병합·압축
         ├── normalize_ingredients_llm.py  # 재료 문자열 LLM 정규화 + validate_ingredients()
         ├── ranking.py          # (비어 있음) 점수 계산 예정
         └── generate_recipe_llm.py  # LLM으로 RecipeResponse 구조화 생성 → generate_recipe_with_llm()
@@ -151,7 +151,7 @@ pip install -r requirements.txt
 OPENAI_API_KEY=...        # generate_recipe_llm.py (ChatOpenAI가 자동으로 읽음)
 TAVILY_API_KEY=...        # tavily/tavily.py (TavilySearchResults가 자동으로 읽음)
 MFDS_API_KEY=...          # mfds/mfds_api.py (식품안전나라 공공데이터 인증키)
-SPOONACULAR_API_KEY=...   # spoonaculr/spoonaculr_api.py
+SPOONACULAR_API_KEY=...   # spoonacular/spoonacular_api.py
 ```
 
 `.env`는 `.gitignore`에 포함되어 있으며 **절대 커밋하지 않습니다.** 새 키를 추가하면 이 목록도 갱신합니다.
@@ -173,7 +173,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ### 4.4 개별 모듈 단독 실행 (외부 API 확인용)
 
 ```bash
-python -m agent.agent_method.spoonaculr.spoonaculr_api
+python -m agent.agent_method.spoonacular.spoonacular_api
 ```
 
 `if __name__ == "__main__":` 블록에서 샘플 입력으로 동작을 확인합니다. 별도 테스트 프레임워크는 아직 없습니다.

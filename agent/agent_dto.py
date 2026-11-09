@@ -10,7 +10,7 @@ class SourceEnum(str, Enum):
 
 
 # 재료 1개 = 이름 + 원문 (+ 소제목) (Spring의 @Embeddable)
-# 정규화 LLM 출력틀
+# 정규화 LLM 출력형태 선언
 class CandidateIngredient(BaseModel):
     name: str = Field(
         description=(
@@ -41,7 +41,7 @@ class CandidateIngredient(BaseModel):
 # 정규화 LLM 출력 전용 모델 (normalize_rawdata_llm.py의 with_structured_output에 넘긴다)
 # - with_structured_output의 최상위는 객체여야 해서 list[CandidateIngredient]를 한 번 감싼다
 class NormalizedIngredients(BaseModel):
-    """식약처 재료 문자열(RCP_PARTS_DTLS)을 재료 하나 단위로 나눈 결과"""
+    """식약처 재료 문자열(RCP_PARTS_DTLS)을 LLM을 활용해 재료 하나 단위로 나눈 결과"""
 
     ingredients: list[CandidateIngredient] = Field(
         description=(
@@ -52,6 +52,14 @@ class NormalizedIngredients(BaseModel):
         )
     )
 
+class TranslatedIngredient(BaseModel):
+    original: str = Field(description="입력된 재료를 글자 하나 바꾸지 않고 그대로")
+    name_en: str | None = Field(description="영어 레시피 검색용 재료 이름(소문자·단수). 재료가 아니면 null")
+
+
+class TranslatedIngredients(BaseModel):
+    """한국어 식재료 이름을 LLM으로 영어 검색어로 번역한 결과"""
+    translations: list[TranslatedIngredient] = Field(description="입력 순서대로, 입력 하나당 정확히 하나")
 
 # mfds_recipes.json 한 건의 저장 형태로 레시피 생성을 위한 LLM 응답 형식임
 # ingredients는 전처리 가공이 어려워 normalized_LLM 실행결과 형식(NormalizedIngredients)에서 받아 코드에서 조립한다

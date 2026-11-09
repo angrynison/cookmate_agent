@@ -58,7 +58,7 @@
 치즈,cheese,슬라이스치즈|체다치즈,cheese|cheddar cheese|shredded cheese,claude,false
 모짜렐라치즈,mozzarella,모차렐라|피자치즈,mozzarella|mozzarella cheese|shredded mozzarella,claude,false
 생크림,heavy cream,휘핑크림,heavy cream|whipping cream|heavy whipping cream,claude,false
-두부,tofu,부침두부|찌개두부|연두부,tofu|firm tofu|soft tofu,claude,false
+두부,tofu,부침두부|찌개두부,tofu|firm tofu|soft tofu,claude,false
 쌀,rice,백미,rice|white rice|short grain rice,claude,false
 밥,cooked rice,공기밥|흰밥,cooked rice|steamed rice,claude,false
 밀가루,flour,중력분|박력분|강력분,flour|all purpose flour,claude,false
@@ -88,3 +88,22 @@
 꿀,honey,,honey,claude,false
 케첩,ketchup,토마토케첩,ketchup|tomato ketchup,claude,false
 마요네즈,mayonnaise,마요,mayonnaise|mayo,claude,false
+목살,pork shoulder,돼지목살|돼지고기목살,pork shoulder|pork butt|boston butt|pork collar,claude,false
+앞다리살,pork shoulder,돼지앞다리|앞다리,pork shoulder|pork picnic shoulder,claude,false
+항정살,pork jowl,,pork jowl|pork neck,claude,false
+차돌박이,beef brisket,차돌,beef brisket|thinly sliced beef brisket,claude,false
+양지,beef brisket,소양지|양지머리,beef brisket|brisket,claude,false
+사태,beef shank,소사태,beef shank|beef shin,claude,false
+명태,pollock,동태|생태|코다리,pollock|alaska pollock|pollock fillet,claude,false
+황태,dried pollock,북어|황태채|북어채,dried pollock|dried pollack,claude,false
+쭈꾸미,baby octopus,주꾸미,baby octopus|octopus,claude,false
+꼬막,cockle,새꼬막|참꼬막,cockles|cockle,claude,false
+청경채,bok choy,,bok choy|baby bok choy|pak choi,claude,false
+고수,cilantro,고수잎,cilantro|fresh cilantro|coriander leaves,claude,false
+쑥갓,chrysanthemum greens,,chrysanthemum greens|crown daisy,claude,false
+꽈리고추,shishito pepper,,shishito peppers|shishito pepper,claude,false
+적양파,red onion,자색양파,red onion|red onions,claude,false
+연두부,silken tofu,순두부,silken tofu|soft tofu,claude,false
+어묵,fish cake,오뎅|사각어묵,fish cake|fish cakes,claude,false
+다시다,beef bouillon,소고기다시다,beef bouillon|beef stock powder|bouillon,claude,false
+미원,msg,조미료|MSG,msg|monosodium glutamate,claude,false
