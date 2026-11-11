@@ -1,24 +1,49 @@
+import csv
+from functools import lru_cache
 import os
 import re
 
+from anyio import Path
 import httpx
 from dotenv import load_dotenv
 
-from agent.agent_dto import CandidateIngredient, FormattedRecipe, SourceEnum
+from agent.agent_dto import FormattedRecipe
+from agent.agent_method.ingredient_translator import _normalize_key
 
-load_dotenv()
-MFDS_API_KEY = os.getenv("MFDS_API_KEY")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+MFDS_RECIPES_PATH = PROJECT_ROOT / "data" / "mfds_recipes.json"  
+DICT_PATH = PROJECT_ROOT / "resources" / "ingredient_dictionary.csv"
+_PREP_WORDS = re.compile(r"^(다진|깐|채썬|썬|삶은|데친|볶은|손질한|냉동|불린)")
+_STAPLES = ["물", "소금", "설탕", "후추", "후춧가루", "식용유", "참기름", "간장"]
 
 
-MFDS_BASE_URL = "http://openapi.foodsafetykorea.go.kr/api"
-MFDS_SERVICE_ID = "COOKRCP01"
-_MFDS_CODE_OK = "INFO-000"        # 정상 처리
-_MFDS_CODE_NO_DATA = "INFO-200"   # 해당 데이터 없음 
+@lru_cache(maxsize=1)
+def load_canonical_names() -> dict[str, str]:
+    """
+    {조회키: 대표 한국어 이름} (name_ko와 aliases_ko 모두 키)
+    검증된 사전 사용
+    """
+    names: dict[str, str] = {}
+    with open(DICT_PATH, encoding ="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            key = _normalize_key(row["name_ko"])
+            names[key] = row["name_ko"]
 
-def search_recipes_mfds(ingredients: list[str], number: int = 3) -> list[FormattedRecipe]:
+            aliases = row["aliases_ko"].split("|")
+            for alias in aliases:
+                if alias:
+                    names[_normalize_key(alias)] = row["name_ko"]
+    return names
+    
+
+
+
+
+def search_recipes_mfds(pantries: list[str], number: int = 3) -> list[FormattedRecipe]:
     """
     오프라인 normazlied 된 mfds_recipes.json을 사용하여 재료 기반 레시피 검색
     """
+
 
 
 
