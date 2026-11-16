@@ -16,9 +16,9 @@ import json
 import time
 from collections import Counter
 from pathlib import Path
+import re
 
 from agent.agent_dto import FormattedRecipe, SourceEnum
-from agent.agent_method.mfds.mfds_api import extract_steps
 from scripts.normalize_mfds_llm import (
     normalize_ingredients_with_llm,
     validate_ingredients,
@@ -80,6 +80,36 @@ def ensure_newline(path: Path) -> None:
     if last_byte != b"\n":
         with open(path, "a", encoding="utf-8") as f:
             f.write("\n")
+
+
+# 정규식은 모듈 로드 시 한 번만 컴파일해서 재사용 
+"""
+_extract_ingredient_name
+일부 row에서 소제목 앞에 붙는 기호
+"""
+_BULLETS = "●•·-"
+
+"""
+_extract_steps
+조리 단계 앞의 번호: "1. ", "10." 같은 패턴 구분
+"""
+_STEP_NUMBER = re.compile(r"^\s*\d+\s*\.\s*")
+
+def extract_steps(row: dict) -> list[str]:
+    """
+    레시피 추출
+    MANUAL01 ~ MANUAL20 중 내용이 있는 것만 순서대로 모으고 앞 번호("1. ")를 뗀다
+    MANUAL 갯수는 정해져있음
+    """
+    steps: list[str] = []
+    for i in range(1, 21):
+        # f"{i:02d}" = 두 자리로 0 채우기 → MANUAL01, MANUAL02, ..., MANUAL20
+        text = (row.get(f"MANUAL{i:02d}") or "").strip()
+        # 비어있는것 PASS
+        if not text:
+            continue
+        steps.append(_STEP_NUMBER.sub("", text))
+    return steps
 
 
 def check_data(row: dict) -> str | None:
@@ -147,6 +177,7 @@ def normalize_all_rows(rows: list[dict], done: dict[str, FormattedRecipe]) -> tu
                 continue
 
             called += 1
+            # 정규화 시도. 실패하면 실패 목록에 기록하고 계속 진행
             try:
                 recipe = normalize_row(row)
             except Exception as e:   # 한 건의 실패(네트워크·요청 한도·검증)가 전체를 멈추지 않게

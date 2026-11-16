@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
-
-
-from agent.agent_method.mfds.mfds_api import fetch_mfds_rows
+import httpx
+from dotenv import load_dotenv
+import os
 
 # MFDS 최대 요청 개수가 1000개임
 PAGE_SIZE = 1000
@@ -10,6 +10,30 @@ PAGE_SIZE = 1000
 # 실행 위치와 상관없이 항상 "프로젝트 루트/data/mfds_recipes.json"에 저장
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_PATH = PROJECT_ROOT / "data" / "mfds_raw.json"
+
+def fetch_mfds_rows(start: int, end: int) -> tuple[list[dict], int]:
+    """
+    MFDS API에서 start~end 범위의 레시피 row를 가져온다.
+    반환값: (rows, total)
+    """
+
+    load_dotenv()
+    MFDS_API_KEY = os.getenv("MFDS_API_KEY")
+    if not MFDS_API_KEY:
+        raise ValueError("MFDS_API_KEY 환경 변수가 설정되지 않았습니다.")
+
+    url = "https://openapi.foodsafetykorea.go.kr/api/{}/COOKRCP01/json/{}/{}".format(
+        MFDS_API_KEY, start, end
+    )
+
+    response = httpx.get(url)
+    response.raise_for_status()
+
+    data = response.json()
+    rows = data["COOKRCP01"]["row"]
+    total = int(data["COOKRCP01"]["total_count"])
+    return rows, total
+
 
 
 def download_all_rows() -> list[dict]:
